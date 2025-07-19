@@ -24,7 +24,7 @@ const App = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!booking.name || !booking.phone || !booking.setup || !booking.date || !booking.time) {
@@ -33,27 +33,39 @@ const App = () => {
     }
 
     try {
-      await addDoc(collection(db, 'bookings'), {
-        ...booking,
-        timestamp: serverTimestamp()
+      // Using Formspree instead of Firebase
+      const response = await fetch("https://formspree.io/f/movljvoz", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: booking.name,
+          phone: booking.phone,
+          setup: booking.setup,
+          date: booking.date,
+          time: booking.time,
+          duration: booking.duration
+        })
       });
 
-      setConfirmationMessage(`Thank you, ${booking.name}! We've received your ${booking.setup} booking for ${booking.date}. We'll reach you shortly.`);
-      setShowConfirmation(true);
+      if (response.ok) {
+        setConfirmationMessage(`Thank you, ${booking.name}! We've received your ${booking.setup} booking for ${booking.date}. We'll reach you shortly.`);
+        setShowConfirmation(true);
 
-      setTimeout(() => {
-        setShowConfirmation(false);
-      }, 5000);
+        setTimeout(() => {
+          setShowConfirmation(false);
+        }, 5000);
 
-      setBooking({
-        name: '',
-        phone: '',
-        setup: '',
-        date: '',
-        time: '',
-        duration: '1'
-      });
-
+        setBooking({
+          name: '',
+          phone: '',
+          setup: '',
+          date: '',
+          time: '',
+          duration: '1'
+        });
+      }
     } catch (error) {
       console.error('Error:', error);
       setConfirmationMessage('Booking failed. Please try again or contact us directly.');
