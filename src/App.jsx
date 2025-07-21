@@ -8,13 +8,17 @@ const App = () => {
     name: '',
     phone: '',
     setup: '',
+    people: '',
     date: '',
     time: '',
-    duration: '1'
+    duration: '1',
+    notes: '',
   });
 
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [confirmationMessage, setConfirmationMessage] = useState('');
+  const [paymentStarted, setPaymentStarted] = useState(false);
+  const [utr, setUtr] = useState('');
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -26,6 +30,12 @@ const App = () => {
 
 const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (paymentStarted && !/^[0-9]{12}$/.test(utr)) {
+     alert("Please enter a valid 12-digit UTR / Transaction ID.");
+     return;
+    }
+
     
     if (!booking.name || !booking.phone || !booking.setup || !booking.date || !booking.time) {
       alert('Please fill in all required fields');
@@ -43,9 +53,12 @@ const handleSubmit = async (e) => {
           name: booking.name,
           phone: booking.phone,
           setup: booking.setup,
+          people: booking.setup === 'ps5' ? booking.people : 'N/A',
           date: booking.date,
           time: booking.time,
-          duration: booking.duration
+          duration: booking.duration,
+          notes: booking.notes,
+          utr
         })
       });
 
@@ -63,7 +76,8 @@ const handleSubmit = async (e) => {
           setup: '',
           date: '',
           time: '',
-          duration: '1'
+          duration: '1',
+          notes: '',
         });
       }
     } catch (error) {
@@ -257,6 +271,24 @@ const handleSubmit = async (e) => {
                   <option value="wheel">Racing Simulator</option>
                 </select>
               </div>
+              {booking.setup === 'ps5' && (
+                <div className="form-group">
+                  <label htmlFor="people">Number of People</label>
+                  <select
+                  id="people"
+                  value={booking.people} 
+                  onChange={handleChange}
+                  required
+                >
+                   <option value="">Select</option>
+                   <option value="1">1</option>
+                   <option value="2">2</option>
+                   <option value="3">3</option>
+                   <option value="4">4</option>
+                 </select>
+               </div>
+             )}
+              
               <div className="form-group">
                 <label htmlFor="date">Booking Date</label>
                 <input 
@@ -292,7 +324,45 @@ const handleSubmit = async (e) => {
                   <option value="5">5 Hours</option>
                 </select>
               </div>
-              <button type="submit" className="btn">CONFIRM BOOKING</button>
+
+              <div className="form-group">
+                <label htmlFor="notes">Notes (optional)</label>
+                <textarea 
+                  id="notes"
+                  rows="3"
+                  value={booking.notes || ''}
+                  onChange={handleChange}
+                  placeholder="Any game preference or requests..."
+                ></textarea>
+              </div>
+
+              
+{!paymentStarted ? (
+  <button type="button" className="btn" onClick={() => setPaymentStarted(true)}>
+    PROCEED TO PAYMENT
+  </button>
+) : (
+  <>
+    <div className="form-group">
+      <label>Scan & Pay</label>
+      <img src="images/qr.png" alt="UPI QR" style={{ maxWidth: '100%', marginBottom: '1rem' }} />
+      <p style={{ color: '#0ff' }}><strong>UPI ID:</strong> Q541176484@ybl</p>
+    </div>
+    <div className="form-group">
+      <label htmlFor="utr">Enter UTR/Txn ID after payment</label>
+      <input
+        type="text"
+        id="utr"
+        value={utr}
+        onChange={(e) => setUtr(e.target.value)}
+        placeholder="Example: 123456789012"
+        required
+      />
+    </div>
+    <button type="submit" className="btn">CONFIRM BOOKING</button>
+  </>
+)}
+
             </form>
           </div>
         </div>
