@@ -321,7 +321,7 @@ const handleSubmit = async (e) => {
                   <option value="1">1 Hour</option>
                   <option value="2">2 Hours</option>
                   <option value="3">3 Hours</option>
-                  <option value="5">5 Hours</option>
+                  <option value="5">4 Hours</option>
                 </select>
               </div>
 
@@ -343,11 +343,15 @@ const handleSubmit = async (e) => {
   </button>
 ) : (
   <>
-    <div className="form-group">
-      <label>Scan & Pay</label>
-      <img src="images/qr.png" alt="UPI QR" style={{ maxWidth: '100%', marginBottom: '1rem' }} />
-      <p style={{ color: '#0ff' }}><strong>UPI ID:</strong> Q541176484@ybl</p>
-    </div>
+   <div className="form-group">
+  <p style={{ color: 'red', fontWeight: 'bold' }}>
+    Pay at least ₹50 to confirm your booking
+  </p>
+  <label>Scan & Pay</label>
+  <img src="images/qr.png" alt="UPI QR" style={{ maxWidth: '100%', marginBottom: '1rem' }} />
+  <p style={{ color: '#0ff' }}><strong>UPI ID:</strong> Q541176484@ybl</p>
+</div>
+
     <div className="form-group">
       <label htmlFor="utr">Enter UTR/Txn ID after payment</label>
       <input
