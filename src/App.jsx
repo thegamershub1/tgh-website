@@ -2,8 +2,15 @@ import { useState } from 'react';
 import './App.css';
 import { db } from './firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+import { useEffect } from 'react';
 
 const App = () => {
+  useEffect(() => {
+    AOS.init({ duration: 800, once: true });
+  }, []);
+
   const [booking, setBooking] = useState({
     name: '',
     phone: '',
@@ -17,33 +24,32 @@ const App = () => {
 
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [confirmationMessage, setConfirmationMessage] = useState('');
-  const [paymentStarted, setPaymentStarted] = useState(false);
-  const [utr, setUtr] = useState('');
+  const [selectedSetupDetails, setSelectedSetupDetails] = useState(null);
+  const [showGamesModal, setShowGamesModal] = useState(false);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
+    
+    if (id === 'setup') {
+      const setupDetails = setups.find(setup => setup.id === value);
+      setSelectedSetupDetails(setupDetails);
+    }
+    
     setBooking(prev => ({
       ...prev,
       [id]: value
     }));
   };
 
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (paymentStarted && !/^[0-9]{12}$/.test(utr)) {
-     alert("Please enter a valid 12-digit UTR / Transaction ID.");
-     return;
-    }
-
-    
     if (!booking.name || !booking.phone || !booking.setup || !booking.date || !booking.time) {
       alert('Please fill in all required fields');
       return;
     }
 
     try {
-      // Using Formspree instead of Firebase
       const response = await fetch("https://formspree.io/f/movljvoz", {
         method: "POST",
         headers: {
@@ -58,7 +64,6 @@ const handleSubmit = async (e) => {
           time: booking.time,
           duration: booking.duration,
           notes: booking.notes,
-          utr
         })
       });
 
@@ -79,6 +84,7 @@ const handleSubmit = async (e) => {
           duration: '1',
           notes: '',
         });
+        setSelectedSetupDetails(null);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -87,28 +93,77 @@ const handleSubmit = async (e) => {
     }
   };
 
-  // Setups data
+  // Game lists for each setup
+  const gameLists = {
+    ps5: [
+      { name: 'Black myth wukong', price: '₹100/hr', players: 'Single Player' },
+      { name: 'Spider-Man 2', price: '₹100/hr', players: 'Single Player' },
+      { name: 'God of War', price: '₹100/hr', players: 'Single Player' },
+      { name: 'The Witcher 3', price: '₹100/hr', players: 'Single Player' },
+      { name: 'FC25', price: '₹100-190-280-380/hr', players: 'Single/Multiplayer (1-4)' },
+      { name: 'Mortal Kombat', price: '₹100-190/hr', players: 'single/Multiplayer' },
+      { name: 'Grand Theft Auto V', price: '₹100/hr', players: 'Single Player' },
+      { name: 'Tekken 8', price: '₹100-190/hr', players: 'Single/Multiplayer' },
+      { name: 'It takes two', price: '₹100-190/hr', players: 'Single/Multiplayer' },
+      { name: 'Asphalt Legend Unite', price: '₹100-190/hr', players: 'Single/Multiplayer' },
+      { name: 'Dirt 5', price: '₹100-190-280-380/hr', players: 'Single/Multiplayer (1-4)' },
+      { name: 'WWE 2K24', price: '₹100-190-280-380/hr', players: 'Single/Multiplayer (1-4)' },
+      { name: 'F124', price: '₹100-190-280-380/hr', players: 'Single/Multiplayer (1-4)' } 
+        ],
+    pc: [
+      { name: 'Valorant', price: '₹89/hr' },
+      { name: 'Counter-Strike 2', price: '₹89/hr' },
+      { name: 'Call of Duty: Black ops 6', price: '₹89/hr' },
+      { name: 'Hogwart legacy', price: '₹89/hr' },
+      { name: 'RDR 2', price: '₹89/hr' },
+      { name: 'GTA V', price: '₹89/hr' },
+      { name: 'Forza Horizon', price: '₹89/hr' },
+      { name: 'Free Fire', price: '₹89/hr' },
+      { name: 'BGMI', price: '₹89/hr' },
+      { name: 'Minecraft', price: '₹89/hr' },
+      { name: 'Poppy Playtime/Kamla', price: '₹89/hr' },
+      { name: 'Chained together', price: '₹89/hr' },
+    ],
+    wheel: [
+      { name: 'Forza Horizon 5', price: '₹150/hr' },
+      { name: 'The Crew Motorfest', price: '₹150/hr' },
+      { name: 'Need for Speed: Heat', price: '₹150/hr'},
+      { name: 'My First Gran Turismo', price: '₹150/hr' },
+      { name: 'Assetto Corsa', price: '₹150/hr' }
+    ]
+  };
+
+  // Setups data with prices
   const setups = [
     {
       id: 'ps5',
       name: 'PS5',
       description: '4K @ 120Hz | DualSense Controllers',
-      features: ['2 units available', 'Supports 4 players', '100+ games'],
-      image: 'images/ps5-setup.jpg'
+      features: ['2 units available', 'Supports 4 players', 'Split-screen & Local Multiplayer'],
+      image: 'images/ps5-setup.jpg',
+      basePrice: '₹100/hr',
+      multiplayer: 'Up to 4 players',
+      games: gameLists.ps5
     },
     {
       id: 'pc',
       name: 'ELITE GAMING PC',
       description: '240Hz | RTX 4060 | Ryzen 5 Processor',
       features: ['2 units available', 'Mechanical keyboards', 'Competitive-ready', 'With RTX 4060 GPU'],
-      image: 'images/gaming-pc.jpg'
+      image: 'images/gaming-pc.jpg',
+      basePrice: '₹89/hr',
+      multiplayer: 'Online multiplayer',
+      games: gameLists.pc
     },
     {
       id: 'wheel',
       name: 'RACING SIMULATOR',
       description: 'Logitech G29',
       features: ['Full racing seat', 'Force feedback', 'Gear supported'],
-      image: 'images/steering wheel.jpg'
+      image: 'images/steering wheel.jpg',
+      basePrice: '₹150/hr',
+      multiplayer: 'Single player only',
+      games: gameLists.wheel
     }
   ];
 
@@ -144,11 +199,11 @@ const handleSubmit = async (e) => {
       title: 'Opening Hours',
       content: 'Sat-Thu: 10AM - 10PM<br>Fri: 2PM - 10PM'
     },
-     {
-    icon: 'instagram', // Make sure you have an Instagram icon in your project
-    title: 'Instagram',
-    content: '<a href="https://instagram.com/the.gamers.hub_" target="_blank" rel="noopener noreferrer">@the.gamers.hub_</a>'
-  }
+    {
+      icon: 'instagram',
+      title: 'Instagram',
+      content: '<a href="https://instagram.com/the.gamers.hub_" target="_blank" rel="noopener noreferrer">@the.gamers.hub_</a>'
+    }
   ];
 
   return (
@@ -157,6 +212,43 @@ const handleSubmit = async (e) => {
       {showConfirmation && (
         <div className="confirmation-banner">
           <p>{confirmationMessage}</p>
+        </div>
+      )}
+
+      {/* Games Modal */}
+      {showGamesModal && selectedSetupDetails && (
+        <div className="modal-overlay" onClick={() => setShowGamesModal(false)}>
+          <div className="games-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{selectedSetupDetails.name} - Available Games</h3>
+              <button 
+                className="close-btn"
+                onClick={() => setShowGamesModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="games-grid">
+              {selectedSetupDetails.games.map((game, index) => (
+                <div key={index} className="game-card">
+                  <div className="game-info">
+                    <h4>{game.name}</h4>
+                    <span className="player-type">{game.players}</span>
+                  </div>
+                  <div className="game-price">{game.price}</div>
+                </div>
+              ))}
+            </div>
+            <div className="modal-footer">
+              <p className="base-price">Base Setup Price: <strong>{selectedSetupDetails.basePrice}</strong></p>
+              <button 
+                className="btn btn-secondary"
+                onClick={() => setShowGamesModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -205,11 +297,24 @@ const handleSubmit = async (e) => {
                 <div className="setup-info">
                   <h3 className="setup-name">{setup.name}</h3>
                   <p>{setup.description}</p>
+                  <div className="setup-meta">
+                    <span className="price-tag">{setup.basePrice}</span>
+                    <span className="player-info">{setup.multiplayer}</span>
+                  </div>
                   <ul>
                     {setup.features.map((feature, index) => (
                       <li key={index}>{feature}</li>
                     ))}
                   </ul>
+                  <button 
+                    className="btn-view-games"
+                    onClick={() => {
+                      setSelectedSetupDetails(setup);
+                      setShowGamesModal(true);
+                    }}
+                  >
+                    View Games & Prices
+                  </button>
                 </div>
               </div>
             ))}
@@ -237,26 +342,29 @@ const handleSubmit = async (e) => {
           <h2 className="section-title">BOOK YOUR SESSION</h2>
           <div className="booking-form">
             <form id="bookingForm" onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label htmlFor="name">Full Name</label>
-                <input 
-                  type="text" 
-                  id="name" 
-                  value={booking.name}
-                  onChange={handleChange}
-                  required 
-                />
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="name">Full Name</label>
+                  <input 
+                    type="text" 
+                    id="name" 
+                    value={booking.name}
+                    onChange={handleChange}
+                    required 
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="phone">Phone Number</label>
+                  <input 
+                    type="tel" 
+                    id="phone" 
+                    value={booking.phone}
+                    onChange={handleChange}
+                    required 
+                  />
+                </div>
               </div>
-              <div className="form-group">
-                <label htmlFor="phone">Phone Number</label>
-                <input 
-                  type="tel" 
-                  id="phone" 
-                  value={booking.phone}
-                  onChange={handleChange}
-                  required 
-                />
-              </div>
+
               <div className="form-group">
                 <label htmlFor="setup">Choose Setup</label>
                 <select 
@@ -271,45 +379,65 @@ const handleSubmit = async (e) => {
                   <option value="wheel">Racing Simulator</option>
                 </select>
               </div>
+
+              {selectedSetupDetails && (
+                <div className="setup-preview">
+                  <div className="preview-header">
+                    <h4>Selected: {selectedSetupDetails.name}</h4>
+                    <span className="preview-price">{selectedSetupDetails.basePrice}</span>
+                  </div>
+                  <button 
+                    type="button"
+                    className="btn-view-games-small"
+                    onClick={() => setShowGamesModal(true)}
+                  >
+                    View All Games
+                  </button>
+                </div>
+              )}
+
               {booking.setup === 'ps5' && (
                 <div className="form-group">
                   <label htmlFor="people">Number of People</label>
                   <select
-                  id="people"
-                  value={booking.people} 
-                  onChange={handleChange}
-                  required
-                >
-                   <option value="">Select</option>
-                   <option value="1">1</option>
-                   <option value="2">2</option>
-                   <option value="3">3</option>
-                   <option value="4">4</option>
-                 </select>
-               </div>
-             )}
+                    id="people"
+                    value={booking.people} 
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                  </select>
+                </div>
+              )}
               
-              <div className="form-group">
-                <label htmlFor="date">Booking Date</label>
-                <input 
-                  type="date" 
-                  id="date" 
-                  min={new Date().toISOString().split('T')[0]}
-                  value={booking.date}
-                  onChange={handleChange}
-                  required 
-                />
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="date">Booking Date</label>
+                  <input 
+                    type="date" 
+                    id="date" 
+                    min={new Date().toISOString().split('T')[0]}
+                    value={booking.date}
+                    onChange={handleChange}
+                    required 
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="time">Start Time</label>
+                  <input 
+                    type="time" 
+                    id="time" 
+                    value={booking.time}
+                    onChange={handleChange}
+                    required 
+                  />
+                </div>
               </div>
-              <div className="form-group">
-                <label htmlFor="time">Start Time</label>
-                <input 
-                  type="time" 
-                  id="time" 
-                  value={booking.time}
-                  onChange={handleChange}
-                  required 
-                />
-              </div>
+
               <div className="form-group">
                 <label htmlFor="duration">Duration</label>
                 <select 
@@ -321,52 +449,22 @@ const handleSubmit = async (e) => {
                   <option value="1">1 Hour</option>
                   <option value="2">2 Hours</option>
                   <option value="3">3 Hours</option>
-                  <option value="5">4 Hours</option>
+                  <option value="4">4 Hours</option>
                 </select>
               </div>
 
               <div className="form-group">
-                <label htmlFor="notes">Notes (optional)</label>
+                <label htmlFor="notes">Game Preferences (optional)</label>
                 <textarea 
                   id="notes"
                   rows="3"
                   value={booking.notes || ''}
                   onChange={handleChange}
-                  placeholder="Any game preference or requests..."
+                  placeholder="Mention your preferred games..."
                 ></textarea>
               </div>
 
-              
-{!paymentStarted ? (
-  <button type="button" className="btn" onClick={() => setPaymentStarted(true)}>
-    PROCEED TO PAYMENT
-  </button>
-) : (
-  <>
-   <div className="form-group">
-  <p style={{ color: 'red', fontWeight: 'bold' }}>
-    Pay at least ₹50 to confirm your booking
-  </p>
-  <label>Scan & Pay</label>
-  <img src="images/qr.png" alt="UPI QR" style={{ maxWidth: '100%', marginBottom: '1rem' }} />
-  <p style={{ color: '#0ff' }}><strong>UPI ID:</strong> Q541176484@ybl</p>
-</div>
-
-    <div className="form-group">
-      <label htmlFor="utr">Enter UTR/Txn ID after payment</label>
-      <input
-        type="text"
-        id="utr"
-        value={utr}
-        onChange={(e) => setUtr(e.target.value)}
-        placeholder="Example: 123456789012"
-        required
-      />
-    </div>
-    <button type="submit" className="btn">CONFIRM BOOKING</button>
-  </>
-)}
-
+              <button type="submit" className="btn btn-primary">CONFIRM BOOKING</button>
             </form>
           </div>
         </div>
@@ -431,6 +529,8 @@ const handleSubmit = async (e) => {
           --neon-pink: #ff00aa;
           --dark-bg: #0a0a1a;
           --card-bg: rgba(20, 20, 40, 0.8);
+          --glass-bg: rgba(255, 255, 255, 0.1);
+          --glass-border: rgba(255, 255, 255, 0.2);
         }
         
         body {
@@ -470,6 +570,233 @@ const handleSubmit = async (e) => {
         @keyframes fadeIn {
           from { opacity: 0; top: 0; }
           to { opacity: 1; top: 20px; }
+        }
+        
+        /* Modal Overlay */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(10, 10, 26, 0.9);
+          backdrop-filter: blur(10px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          padding: 1rem;
+        }
+        
+        .games-modal {
+          background: var(--glass-bg);
+          backdrop-filter: blur(20px);
+          border: 1px solid var(--glass-border);
+          border-radius: 20px;
+          padding: 2rem;
+          max-width: 800px;
+          width: 100%;
+          max-height: 80vh;
+          overflow-y: auto;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 2rem;
+          padding-bottom: 1rem;
+          border-bottom: 1px solid var(--glass-border);
+        }
+        
+        .modal-header h3 {
+          color: var(--neon-blue);
+          font-family: 'Orbitron', sans-serif;
+          margin: 0;
+        }
+        
+        .close-btn {
+          background: none;
+          border: none;
+          color: white;
+          font-size: 2rem;
+          cursor: pointer;
+          padding: 0;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: background 0.3s;
+        }
+        
+        .close-btn:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .games-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 1rem;
+          margin-bottom: 2rem;
+        }
+        
+        .game-card {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid var(--glass-border);
+          border-radius: 12px;
+          padding: 1.5rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          transition: transform 0.3s, border-color 0.3s;
+        }
+        
+        .game-card:hover {
+          transform: translateY(-2px);
+          border-color: var(--neon-blue);
+        }
+        
+        .game-info h4 {
+          margin: 0 0 0.5rem 0;
+          font-size: 1rem;
+        }
+        
+        .player-type {
+          font-size: 0.8rem;
+          color: var(--neon-pink);
+          background: rgba(255, 0, 170, 0.1);
+          padding: 0.2rem 0.5rem;
+          border-radius: 12px;
+        }
+        
+        .game-price {
+          color: var(--neon-blue);
+          font-weight: bold;
+          font-size: 1.1rem;
+        }
+        
+        .modal-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-top: 1rem;
+          border-top: 1px solid var(--glass-border);
+        }
+        
+        .base-price {
+          color: var(--neon-pink);
+          font-size: 1.1rem;
+          margin: 0;
+        }
+        
+        /* Enhanced Setup Cards */
+        .setup-meta {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin: 1rem 0;
+        }
+        
+        .price-tag {
+          background: linear-gradient(45deg, var(--neon-blue), var(--neon-pink));
+          color: white;
+          padding: 0.3rem 0.8rem;
+          border-radius: 20px;
+          font-weight: bold;
+          font-size: 0.9rem;
+        }
+        
+        .player-info {
+          color: var(--neon-pink);
+          font-size: 0.9rem;
+        }
+        
+        .btn-view-games {
+          background: transparent;
+          border: 2px solid var(--neon-blue);
+          color: var(--neon-blue);
+          padding: 0.6rem 1.2rem;
+          border-radius: 25px;
+          font-weight: bold;
+          cursor: pointer;
+          transition: all 0.3s;
+          width: 100%;
+          margin-top: 1rem;
+        }
+        
+        .btn-view-games:hover {
+          background: var(--neon-blue);
+          color: var(--dark-bg);
+          transform: translateY(-2px);
+        }
+        
+        /* Enhanced Booking Form */
+        .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+        }
+        
+        .setup-preview {
+          background: rgba(0, 245, 255, 0.1);
+          border: 1px solid var(--neon-blue);
+          border-radius: 12px;
+          padding: 1rem;
+          margin-bottom: 1.5rem;
+        }
+        
+        .preview-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.5rem;
+        }
+        
+        .preview-header h4 {
+          color: var(--neon-blue);
+          margin: 0;
+        }
+        
+        .preview-price {
+          color: var(--neon-pink);
+          font-weight: bold;
+        }
+        
+        .btn-view-games-small {
+          background: transparent;
+          border: 1px solid var(--neon-blue);
+          color: var(--neon-blue);
+          padding: 0.4rem 0.8rem;
+          border-radius: 15px;
+          font-size: 0.8rem;
+          cursor: pointer;
+          transition: all 0.3s;
+        }
+        
+        .btn-view-games-small:hover {
+          background: var(--neon-blue);
+          color: var(--dark-bg);
+        }
+        
+        .btn-primary {
+          background: linear-gradient(45deg, var(--neon-blue), var(--neon-pink));
+          width: 100%;
+          padding: 1rem 2rem;
+          font-size: 1.1rem;
+        }
+        
+        .btn-secondary {
+          background: transparent;
+          border: 2px solid var(--neon-pink);
+          color: var(--neon-pink);
+        }
+        
+        .btn-secondary:hover {
+          background: var(--neon-pink);
+          color: white;
         }
         
         /* Mega Logo */
@@ -591,6 +918,7 @@ const handleSubmit = async (e) => {
           cursor: pointer;
           margin-top: 1.5rem;
           transition: transform 0.3s, box-shadow 0.3s;
+          text-decoration: none;
         }
         
         .btn:hover {
@@ -632,7 +960,7 @@ const handleSubmit = async (e) => {
         
         .setup-card {
           background: var(--card-bg);
-          border-radius: 10px;
+          border-radius: 15px;
           overflow: hidden;
           border: 1px solid rgba(0, 245, 255, 0.2);
           transition: transform 0.3s, box-shadow 0.3s;
@@ -679,7 +1007,7 @@ const handleSubmit = async (e) => {
           margin: 0 auto;
           background: var(--card-bg);
           padding: 2rem;
-          border-radius: 10px;
+          border-radius: 15px;
           border: 1px solid rgba(0, 245, 255, 0.3);
           width: 100%;
         }
@@ -695,17 +1023,18 @@ const handleSubmit = async (e) => {
           font-weight: 600;
         }
         
-        input, select {
+        input, select, textarea {
           width: 100%;
           padding: 0.8rem;
           background: rgba(10, 10, 26, 0.7);
           border: 1px solid rgba(0, 245, 255, 0.3);
-          border-radius: 5px;
+          border-radius: 8px;
           color: white;
           font-size: 1rem;
+          transition: border-color 0.3s;
         }
         
-        input:focus, select:focus {
+        input:focus, select:focus, textarea:focus {
           outline: none;
           border-color: var(--neon-blue);
           box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
@@ -722,7 +1051,7 @@ const handleSubmit = async (e) => {
         .gallery-item {
           height: 250px;
           overflow: hidden;
-          border-radius: 5px;
+          border-radius: 10px;
           position: relative;
           width: 100%;
         }
@@ -750,7 +1079,7 @@ const handleSubmit = async (e) => {
         .contact-card {
           background: var(--card-bg);
           padding: 2rem;
-          border-radius: 10px;
+          border-radius: 15px;
           border: 1px solid rgba(0, 245, 255, 0.3);
           text-align: center;
           width: 100%;
@@ -771,7 +1100,7 @@ const handleSubmit = async (e) => {
         /* Map Container */
         .map-container {
           margin-top: 3rem;
-          border-radius: 10px;
+          border-radius: 15px;
           overflow: hidden;
           border: 2px solid var(--neon-blue);
           width: 100%;
@@ -819,6 +1148,24 @@ const handleSubmit = async (e) => {
           
           .setup-img, .gallery-item {
             height: 200px;
+          }
+          
+          .form-row {
+            grid-template-columns: 1fr;
+          }
+          
+          .games-grid {
+            grid-template-columns: 1fr;
+          }
+          
+          .modal-footer {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+          }
+          
+          .games-modal {
+            padding: 1.5rem;
           }
         }
       `}</style>
