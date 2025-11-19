@@ -262,6 +262,9 @@ const App = () => {
       <header>
         <div className="container">
           <nav className="nav">
+            <div className="nav-logo">
+              <img src="public/images/tgh-logo.png" alt="THE GAMER'S HUB" className="nav-logo-img" />
+            </div>
             <div className="nav-links">
               <a href="#home">Home</a>
               <a href="#setups">Setups</a>
@@ -500,6 +503,51 @@ const App = () => {
         </div>
       </section>
 
+      {/* Footer */}
+      <footer className="footer">
+  <div className="container">
+    <div className="footer-content">
+
+      {/* Brand Section */}
+      <div className="footer-brand">
+        <img src="public/images/tgh-logo.png" alt="THE GAMER'S HUB" className="footer-logo" />
+        <span className="footer-brand-name">THE GAMER'S HUB</span>
+      </div>
+
+      {/* Contact Info */}
+      <div className="footer-contact-info">
+        <span>📍 Muzaffarpur</span>
+        <span>📞 +91 84346 10086</span>
+        <span>✉️ mrzayed45@gmail.com</span>
+      </div>
+
+      {/* Social Icons */}
+      <div className="footer-social">
+        <a href="https://instagram.com/the.gamers.hub_" target="_blank" rel="noopener noreferrer">
+          <i className="fab fa-instagram"></i>
+        </a>
+        <a href="#" target="_blank" rel="noopener noreferrer">
+          <i className="fab fa-facebook-f"></i>
+        </a>
+        <a href="#" target="_blank" rel="noopener noreferrer">
+          <i className="fab fa-discord"></i>
+        </a>
+      </div>
+
+    </div>
+
+    {/* Legal */}
+    <div className="footer-legal">
+      <div className="footer-links">
+      </div>
+      <div className="footer-copyright">
+        © 2025 THE GAMER'S HUB — All rights reserved.
+      </div>
+    </div>
+  </div>
+</footer>
+
+
       {/* Social Media Links */}
       <div className="social-links">
         <a href="#"><i className="fab fa-facebook-f"></i></a>
@@ -547,6 +595,114 @@ const App = () => {
           flex-direction: column;
           width: 100%;
           min-height: 100vh;
+        }
+        
+        /* Navigation Logo */
+        .nav {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+        }
+        
+        .nav-logo {
+          display: flex;
+          align-items: center;
+        }
+        
+        .nav-logo-img {
+          height: 35px;
+          width: auto;
+        }
+        
+        /* Footer Styles */
+        .footer {
+          background: rgba(10, 10, 26, 0.95);
+          border-top: 1px solid var(--glass-border);
+          padding: 2rem 0 1rem;
+          margin-top: auto;
+          width: 100%;
+        }
+        
+        .footer-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1.5rem;
+          flex-wrap: wrap;
+          gap: 1rem;
+        }
+        
+        .footer-brand {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        
+        .footer-logo {
+          height: 25px;
+          width: auto;
+        }
+        
+        .footer-brand-name {
+          font-family: 'Orbitron', sans-serif;
+          color: var(--neon-blue);
+          font-size: 0.9rem;
+          font-weight: bold;
+        }
+        
+        .footer-contact-info {
+          display: flex;
+          gap: 1.5rem;
+          font-size: 0.8rem;
+          color: rgba(255, 255, 255, 0.8);
+          flex-wrap: wrap;
+        }
+        
+        .footer-social {
+          display: flex;
+          gap: 1rem;
+        }
+        
+        .footer-social a {
+          color: rgba(255, 255, 255, 0.7);
+          font-size: 0.9rem;
+          transition: color 0.3s;
+        }
+        
+        .footer-social a:hover {
+          color: var(--neon-blue);
+        }
+        
+        .footer-legal {
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          padding-top: 1rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 1rem;
+        }
+        
+        .footer-links {
+          display: flex;
+          gap: 1.5rem;
+        }
+        
+        .footer-links a {
+          color: rgba(255, 255, 255, 0.6);
+          text-decoration: none;
+          font-size: 0.75rem;
+          transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+          color: var(--neon-blue);
+        }
+        
+        .footer-copyright {
+          color: rgba(255, 255, 255, 0.5);
+          font-size: 0.75rem;
         }
         
         /* Confirmation Banner */
@@ -844,13 +1000,6 @@ const App = () => {
           width: 100%;
         }
         
-        .nav {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          width: 100%;
-        }
-        
         .nav-links {
           display: flex;
           gap: 3rem;
@@ -1132,6 +1281,11 @@ const App = () => {
             font-size: 2.5rem;
           }
           
+          .nav {
+            flex-direction: column;
+            gap: 1rem;
+          }
+          
           .nav-links {
             gap: 1rem;
             flex-wrap: wrap;
@@ -1166,6 +1320,37 @@ const App = () => {
           
           .games-modal {
             padding: 1.5rem;
+          }
+          
+          .footer-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 1.5rem;
+          }
+          
+          .footer-contact-info {
+            justify-content: center;
+          }
+          
+          .footer-legal {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+          }
+          
+          .footer-links {
+            justify-content: center;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .footer-contact-info {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+          
+          .footer-contact-info span {
+            font-size: 0.75rem;
           }
         }
       `}</style>
