@@ -263,7 +263,7 @@ const App = () => {
         <div className="container">
           <nav className="nav">
             <div className="nav-logo">
-              <img src="public/images/tgh-logo.png" alt="THE GAMER'S HUB" className="nav-logo-img" />
+              <img src="/images/tgh-logo.png" alt="THE GAMER'S HUB" className="nav-logo-img" />
             </div>
             <div className="nav-links">
               <a href="#home">Home</a>
@@ -510,7 +510,7 @@ const App = () => {
 
       {/* Brand Section */}
       <div className="footer-brand">
-        <img src="public/images/tgh-logo.png" alt="THE GAMER'S HUB" className="footer-logo" />
+        <img src="/images/tgh-logo.png" alt="THE GAMER'S HUB" className="footer-logo" />
         <span className="footer-brand-name">THE GAMER'S HUB</span>
       </div>
 
