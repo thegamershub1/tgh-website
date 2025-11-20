@@ -192,7 +192,7 @@ const App = () => {
     {
       icon: 'envelope',
       title: 'Email Address',
-      content: 'mrzayed45@gmail.com'
+      content: 'thegamershubcontact@gmail.com'
     },
     {
       icon: 'clock',
@@ -518,7 +518,7 @@ const App = () => {
       <div className="footer-contact-info">
         <span>📍 Muzaffarpur</span>
         <span>📞 +91 84346 10086</span>
-        <span>✉️ mrzayed45@gmail.com</span>
+        <span>✉️ thegamershubcontact@gmail.com</span>
       </div>
 
       {/* Social Icons */}
