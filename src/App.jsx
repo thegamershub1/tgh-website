@@ -27,8 +27,38 @@ const App = () => {
   const [selectedSetupDetails, setSelectedSetupDetails] = useState(null);
   const [showGamesModal, setShowGamesModal] = useState(false);
 
+  // Phone validation handler
+  const handlePhoneChange = (e) => {
+    // Remove non-digits
+    const digits = e.target.value.replace(/\D/g, '');
+    // Limit to 10 digits
+    const phoneValue = digits.slice(0, 10);
+    
+    setBooking(prev => ({
+      ...prev,
+      phone: phoneValue
+    }));
+  };
+
+  // Handle phone paste
+  const handlePhonePaste = (e) => {
+    const paste = (e.clipboardData || window.clipboardData).getData('text');
+    const digits = paste.replace(/\D/g, '').slice(0, 10);
+    e.preventDefault();
+    
+    setBooking(prev => ({
+      ...prev,
+      phone: digits
+    }));
+  };
+
   const handleChange = (e) => {
     const { id, value } = e.target;
+    
+    // Skip phone field as it has its own handler
+    if (id === 'phone') {
+      return; // This will be handled by handlePhoneChange
+    }
     
     if (id === 'setup') {
       const setupDetails = setups.find(setup => setup.id === value);
@@ -43,6 +73,12 @@ const App = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Additional validation for phone number
+    if (booking.phone.length !== 10) {
+      alert('Please enter a valid 10-digit phone number');
+      return;
+    }
 
     if (!booking.name || !booking.phone || !booking.setup || !booking.date || !booking.time) {
       alert('Please fill in all required fields');
@@ -362,9 +398,19 @@ const App = () => {
                     type="tel" 
                     id="phone" 
                     value={booking.phone}
-                    onChange={handleChange}
+                    onChange={handlePhoneChange}
+                    onPaste={handlePhonePaste}
+                    inputMode="numeric"
+                    pattern="\d{10}"
+                    maxLength={10}
+                    placeholder="Enter 10-digit phone"
                     required 
                   />
+                  {booking.phone && booking.phone.length !== 10 && (
+                    <small style={{ color: '#ff00aa', fontSize: '0.8rem' }}>
+                      Please enter exactly 10 digits
+                    </small>
+                  )}
                 </div>
               </div>
 
